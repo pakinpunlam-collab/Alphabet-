@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ICAO Alphabet Flashcards</title>
+<style>
+:root{--bg:#f3f6fb;--ink:#10223f;--mute:#5d6b82;--front:#ffffff;--back:#10223f;--backink:#ffffff;--line:#c9d3e3;--acc:#e8641b;--ok:#1f8f5f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1424;--ink:#e8eefb;--mute:#93a1ba;--front:#15233b;--back:#f3f6fb;--backink:#10223f;--line:#2a3b5a;--acc:#ff8a47;--ok:#4fcf9b}}
+:root[data-theme="dark"]{--bg:#0b1424;--ink:#e8eefb;--mute:#93a1ba;--front:#15233b;--back:#f3f6fb;--backink:#10223f;--line:#2a3b5a;--acc:#ff8a47;--ok:#4fcf9b}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai","Sarabun",system-ui,-apple-system,"Segoe UI",sans-serif;padding:20px 14px 40px;max-width:760px;margin:0 auto}
+h1{font-size:1.35rem;margin:0 0 4px}
+.sub{color:var(--mute);font-size:.9rem;margin:0 0 14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+button{font:inherit;border:1px solid var(--line);background:var(--front);color:var(--ink);padding:8px 12px;border-radius:8px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.prog{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:4px 0 6px}
+.prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+.count{font-size:.85rem;color:var(--mute);margin-bottom:14px}
+.grid{display:block}.nav{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:16px}.nav button{min-width:96px;padding:12px 16px}#pos{color:var(--mute);min-width:70px;text-align:center}
+.card{perspective:900px;height:300px;max-width:380px;margin:0 auto;position:relative;border:0;padding:0;background:none;border-radius:16px}
+.in{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
+.card.flip .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.f{background:var(--front)}
+.b{background:var(--back);color:var(--backink);transform:rotateY(180deg)}
+.big{font-size:7rem;font-weight:700;line-height:1}
+.word{font-size:2.4rem;font-weight:700}
+.hint{font-size:.85rem;color:var(--mute)}
+.b .hint{color:var(--backink);opacity:.6}
+.card.done .f,.card.done .b{box-shadow:inset 0 0 0 3px var(--ok)}
+.tick{position:absolute;top:6px;right:6px;z-index:2;padding:2px 8px;font-size:.75rem;border-radius:20px}
+.card.done .tick{background:var(--ok);color:#fff;border-color:var(--ok)}
+@media (prefers-reduced-motion:reduce){.in{transition:none}}
+</style>
+</head>
+<body>
+<h1>แฟลชการ์ด ICAO Alphabet</h1>
+<p class="sub">แตะการ์ดเพื่อดูคำตอบ กด “จำได้” เมื่อท่องได้แล้ว</p>
+<div class="bar">
+  <button id="m1" class="on">โจทย์: ตัวอักษร</button>
+  <button id="m2">โจทย์: คำอ่าน</button>
+  <button id="sh">สุ่มลำดับ</button>
+  <button id="az">เรียง A–Z</button>
+  <button id="rs">รีเซ็ต</button>
+</div>
+<div class="prog"><i id="pg"></i></div>
+<div class="count" id="ct"></div>
+<div class="grid" id="grid"></div>
+<div class="nav"><button id="pv">ย้อนกลับ</button><span id="pos"></span><button id="nx">ถัดไป</button></div>
+<script>
+const D=[["A","Alfa"],["B","Bravo"],["C","Charlie"],["D","Delta"],["E","Echo"],["F","Foxtrot"],["G","Golf"],["H","Hotel"],["I","India"],["J","Juliett"],["K","Kilo"],["L","Lima"],["M","Mike"],["N","November"],["O","Oscar"],["P","Papa"],["Q","Quebec"],["R","Romeo"],["S","Sierra"],["T","Tango"],["U","Uniform"],["V","Victor"],["W","Whiskey"],["X","X-ray"],["Y","Yankee"],["Z","Zulu"]];
+let order=D.map((_,i)=>i),mode=1,done=new Set(),flipped=new Set(),p=0;
+const grid=document.getElementById('grid');
+function render(){
+  grid.innerHTML='';
+  [order[p]].forEach(i=>{
+    const [l,w]=D[i];
+    const q=mode===1?`<div class="big">${l}</div><div class="hint">แตะเพื่อดูคำอ่าน</div>`:`<div class="word">${w}</div><div class="hint">แตะเพื่อดูตัวอักษร</div>`;
+    const a=mode===1?`<div class="word">${w}</div>`:`<div class="big">${l}</div>`;
+    const c=document.createElement('div');
+    c.className='card'+(flipped.has(i)?' flip':'')+(done.has(i)?' done':'');
+    c.innerHTML=`<button class="tick" type="button">${done.has(i)?'จำได้ ✓':'จำได้'}</button><button type="button" class="in" aria-label="การ์ด ${l}" style="padding:0;border:0;background:none"><div class="face f">${q}</div><div class="face b">${a}</div></button>`;
+    c.querySelector('.in').onclick=()=>{flipped.has(i)?flipped.delete(i):flipped.add(i);c.classList.toggle('flip')};
+    c.querySelector('.tick').onclick=e=>{e.stopPropagation();done.has(i)?done.delete(i):done.add(i);render()};
+    grid.appendChild(c);
+  });
+  document.getElementById('pg').style.width=done.size/26*100+'%';
+  document.getElementById('ct').textContent=`จำได้แล้ว ${done.size} / 26 ตัว`;
+  document.getElementById('pos').textContent=`ใบที่ ${p+1} / 26`;
+  document.getElementById('m1').classList.toggle('on',mode===1);
+  document.getElementById('m2').classList.toggle('on',mode===2);
+}
+function go(d){p=(p+d+26)%26;flipped.clear();render()}
+document.getElementById('pv').onclick=()=>go(-1);
+document.getElementById('nx').onclick=()=>go(1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1)});
+document.getElementById('m1').onclick=()=>{mode=1;flipped.clear();render()};
+document.getElementById('m2').onclick=()=>{mode=2;flipped.clear();render()};
+document.getElementById('sh').onclick=()=>{for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}p=0;flipped.clear();render()};
+document.getElementById('az').onclick=()=>{order=D.map((_,i)=>i);p=0;flipped.clear();render()};
+document.getElementById('rs').onclick=()=>{done.clear();flipped.clear();order=D.map((_,i)=>i);p=0;render()};
+render();
+</script>
+</body>
+</html>
